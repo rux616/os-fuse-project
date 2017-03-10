@@ -5,17 +5,13 @@ import pigpio
 def pigpio_callback(x, y, z):
     print(time.time())
 
-def signal_handler(signal, frame):
-
-
 def main(output_file):
     # open file
     try:
         file_handle = open(output_file, "a")
-    except expression as identifier:
+    except IOError:
+        print("Error opening file ", output_file)
         sys.exit()
-
-    # set up signal handler
 
     # set up pigpio
     pigpio_connection = pigpio.pi()
