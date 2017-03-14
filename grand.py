@@ -22,6 +22,11 @@ class GRand(Operations):
     # Filesystem methods
     # ==================
 
+    def getattr(self, path, fh=None):
+        full_path = self._full_path(path)
+        st = os.lstat(full_path)
+        return dict((key, getattr(st, key)) for key in ('st_atime', 'st_ctime',
+                     'st_gid', 'st_mode', 'st_mtime', 'st_nlink', 'st_size', 'st_uid'))
 
 def main(mountpoint, root):
     FUSE(GRand(root), mountpoint, nothreads=True, foreground=True)
