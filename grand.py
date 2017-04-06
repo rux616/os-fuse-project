@@ -123,6 +123,16 @@ class GRand(Operations):
     def fsync(self, path, fdatasync, fh):
         return self.flush(path, fh)
 
+    # Specific file methods
+    # =====================
+
+    def read_cpm(self, path, length, offset, fh):
+        
+        return 0
+
+    def read_grand(self, path, length, offset, fh):
+        return 0
+
 
 def main(mountpoint, root):
     FUSE(GRand(root), mountpoint, nothreads=True, foreground=True)
