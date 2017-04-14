@@ -8,7 +8,7 @@ def importStamps():
 
 
 def calcNumbers(stamps):
-    print(stamps[0])
+    #print(stamps[0])
 
     randomNums = []
     subtractionList = []
@@ -20,8 +20,8 @@ def calcNumbers(stamps):
         i += 1
 
 
-    for x in subtractionList:
-        print(x)
+    #for x in subtractionList:
+    #    print(x)
 
     i = 0
     for x in range(len(subtractionList) - 1):
@@ -33,11 +33,25 @@ def calcNumbers(stamps):
 
     return randomNums
 
-list = importStamps()
-numbers = calcNumbers(list)
-print(numbers[0])
-i = 0
-for x in numbers:
-    print(numbers[i])
-    i += 1
-print(i)
+def packBits(BitList):
+    packedbits = []
+    #print(len(BitList))
+    i = 0
+    for x in range(len(BitList)-7):
+        packedbits.append(str(BitList[i])+str(BitList[i+1]) +
+            str(BitList[i + 2]) + str(BitList[i + 3]) +
+            str(BitList[i + 4]) + str(BitList[i + 5]) +
+            str(BitList[i + 6]) + str(BitList[i + 7]))
+    #    i += 8
+
+    print(packedbits[0])
+    return packedbits
+
+def newlist():
+    list = importStamps()
+    list = calcNumbers(list)
+    list = packBits(list)
+    return list
+
+list = newlist()
+print(list[0])
