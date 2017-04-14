@@ -24,6 +24,18 @@ class MyFuse(fuse.Fuse):
             print "or interpreting script:"
             print "      python MyFuse.py [-options] rootDir mountPoint"
             sys.exit(0)
+
+        # check to see if the root dir and mount point are valid
+        must_exit = False
+        if os.path.isdir(sys.argv[-2]) is False:
+            print "Error: '" + sys.argv[-2] + "' is not a directory."
+            must_exit = True
+        if os.path.isdir(sys.argv[-1]) is False:
+            print "Error: '" + sys.argv[-1] + "' is not a directory."
+            must_exit = True
+        if must_exit is True:
+            sys.exit(0)
+
         self.rootDir = sys.argv[-2]
         print ":--- " + self.rootDir + " ---:"  # prints second to last argument/rootDir"
         self.open_files = {}                    # initialize open_files to empty
