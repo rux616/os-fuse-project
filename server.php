@@ -1,9 +1,7 @@
-
-
 <?php
 
 $buffer = [];
-$fpointer = 0;  /* do we save this to a file? */
+$fpointer = 0;
 $numStamps = $_GET['numStamps'];
 
 $handle = popen("", "r");
@@ -11,7 +9,7 @@ $handle = popen("", "r");
 	{
 		for ($i = $numStamps; $i > 0; --$i)
 		{
-			$buffer[] = fgets($handle, 32);
+			$buffer = fgets($handle, 32);
 			echo "moving ftell " . ftell($handle);
 		}
 		
@@ -19,12 +17,12 @@ $handle = popen("", "r");
 		
 		echo ftell($handle);
 		echo "Final destination " . $fpointer;
-		echo $buffer[];
+		echo $buffer;
 		
 		pclose($handle);
 	}
 	else
 	{
 		echo "Error: could not open file!\n";
-	}		
+	}			
 ?>
