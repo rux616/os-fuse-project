@@ -195,10 +195,14 @@ class MyFuse(fuse.Fuse):
     # Called on each close so that the filesystem has a chance to report delayed errors.
     def flush(self, path, file_handle=None):    # defines flush method for Fuse
         print "*** FLUSH: ", path               # print information used for debugging
-        if path in self.open_files:             # if path is open, flush the buffer
+
+        if path == "/" + self.randomFilename or path == "/" + self.cpmFilename:
+            to_return = 0                       # ignore the flush and do nothing
+        elif path in self.open_files:           # if path is open, flush the buffer
             file_handle = self.open_files[path]
             file_handle.flush()
-        return 0
+            to_return = 0
+        return to_return
 
     # Closes files and frees-up allocated space
     def release(self, path, file_handle=None):  # releases files and re-allocates used space
