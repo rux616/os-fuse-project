@@ -47,10 +47,13 @@ class MyFuse(fuse.Fuse):
         fuse.Fuse.__init__(self, *args, **kw)   # creates fuse Object
 
         # Initialize dummy stat structure for the two special files.
-        dummyTouch = "/dummytouch"
-        with open(sys.argv[-1] + dummyTouch, 'a'):
-            self.fileStat = os.lstat(sys.argv[-1] + dummyTouch)
-        os.remove(sys.argv[-1] + dummyTouch)
+        dummy_touch = "/dummytouch"
+        with open(sys.argv[-1] + dummy_touch, 'a'):
+            current_mode = stat.S_IMODE(os.lstat(sys.argv[-1] + dummy_touch).st_mode)
+            os.chmod(sys.argv[-1] + dummy_touch, current_mode & \
+              ~(stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH))
+            self.fileStat = os.lstat(sys.argv[-1] + dummy_touch)
+        os.remove(sys.argv[-1] + dummy_touch)
 
   # ==================== Filesystem Methods ====================
 
