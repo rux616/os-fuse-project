@@ -1,9 +1,10 @@
 <?php
 //saves the fpointer to a file, need a seperate file to timestamps for this.
+//0 needs to be the value stored in this file at first.
 
-$buffer = [];
-$numStamps = 5; //$_GET['numStamps'];
-$j = 0;
+$buffer = "";
+$numStamps = 5; #$_GET['numStamps'];
+#$j = 0;
 
 $handle = fopen("timestamps.txt", "r") 
 	or die ("Error: could not open timestamps!\n");
@@ -19,10 +20,11 @@ $fpointer = fgets($write);
 		
 		for ($i = $numStamps; $i > 0; --$i)
 		{
-			$buffer[$j] = fgets($handle, 32);
-			echo "moving ftell: " . ftell($handle);
-			echo "<br> <br>";
-			$j = $j + 1;
+			$buffer .= fgets($handle, 32);
+			#trim($buffer, $character_mask = " \n");
+			#echo "moving ftell: " . ftell($handle);
+			#echo "<br> <br>";
+			#$j = $j + 1;
 		}
 		
 		$write = fopen("fpointer.txt", "w") or die ("failed to open fpointer");	
@@ -30,11 +32,11 @@ $fpointer = fgets($write);
 		$fpointer = ftell($handle);
 		fwrite($write, $fpointer);
 		
-		echo ftell($handle);
-		echo " <br> Final destination <br> " . $fpointer;
-		echo "<br>";
+		#echo ftell($handle);
+		#echo " <br> Final destination <br> " . $fpointer;
+		#echo "<br>";
 		
-		print_r(array_values($buffer));
+		echo $buffer;
 
 		fclose($handle);
 		fclose($write);
