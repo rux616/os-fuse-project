@@ -10,8 +10,10 @@ import time    # gives time functions
 
 fuse.fuse_python_api = (0, 2)   # application programming interface (0, 2)
 
+filenameRandom = "grandom"
+filenameCPM = "gcpm"
+
 class MyFuse(fuse.Fuse):
-    
     # Initializes the filesystem
     def __init__(self, *args, **kw):    # OOP constructor
         for x in sys.argv:              # print for debugging
@@ -52,17 +54,27 @@ class MyFuse(fuse.Fuse):
     # Obtains file attributes - method fills in the elements of the "stat" structure.
     def getattr(self, path):                  # defines getattr to fetch attribute from file
         print "GETATTR-path: ", path          # print information used for debugging
-        return os.lstat(self.rootDir + path)  # return object with syscall updating status attributes
+        if path == "/" + filenameRandom:      # handle the random file
+            to_return = os.lstat("/dev/random")
+            # to_return
+        elif path == "/" + filenameCPM:       # 
+            to_return = os.lstat("/dev/random")
+            # to_return
+        else:
+            to_return = os.lstat(self.rootDir + path)
+        return to_return                      # return object with syscall updating status attributes
     
     # Lists directory entries (dirent) back to a caller
     def readdir(self, path, offset):   # defines readdir which lists files/folders
         print "\n\n*** READDIR: ", path    # print information used for debugging
         print "=====  " + self.rootDir + "  ====="  # print information used for debugging   
         for e in '.', '..':
-            yield fuse.Direntry(e)   
+            yield fuse.Direntry(e)
         for x in os.listdir(self.rootDir + path):     # list all file basenames in path
             yield fuse.Direntry(os.path.basename(x))  # yield fuse.Direntry(os.path.basename(x))
-        return     
+        for e in filenameRandom, filenameCPM:
+            yield fuse.Direntry(e)
+        return
     
     # Removes empty directory of specified name
     def rmdir(self, path):         # defines rmdir to remove directories
