@@ -181,12 +181,16 @@ class MyFuse(fuse.Fuse):
     # Writes file data from buffer beginning at file start offset
     def write(self, path, buf, offset, file_handle=None):  # defines method to write to a file
         print "*** WRITE: ", path
-        print "** offset: ", offset     # print information used for debugging
+        print "** offset: ", offset             # print information used for debugging
 
-        file_handle = self.open_files[path] # set output file to value
-        file_handle.seek(offset)            # find/seek location (aka offset) from file start
-        file_handle.write(buf)              # write to file from buffer
-        return len(buf)                 # return buffer length
+        if path == "/" + self.randomFilename or path == "/" + self.cpmFilename:
+            to_return = -errno.EPERM            # return an "operation not permitted" error
+        else:
+            file_handle = self.open_files[path] # set output file to value
+            file_handle.seek(offset)            # find/seek location (aka offset) from file start
+            file_handle.write(buf)              # write to file from buffer
+            to_return = len(buf)                # return buffer length
+        return to_return
 
     # Called on each close so that the filesystem has a chance to report delayed errors.
     def flush(self, path, file_handle=None):   # defines flush method for Fuse
