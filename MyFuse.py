@@ -10,8 +10,8 @@ import time    # gives time functions
 
 fuse.fuse_python_api = (0, 2)   # application programming interface (0, 2)
 
-filenameRandom = "grandom"
-filenameCPM = "gcpm"
+filenameRandom = "grandom"      # variable to hold the filename for random number access
+filenameCPM = "gcpm"            # variable to hold the filename for CPM access
 
 class MyFuse(fuse.Fuse):
     # Initializes the filesystem
@@ -34,6 +34,9 @@ class MyFuse(fuse.Fuse):
             must_exit = True
         if os.path.isdir(sys.argv[-1]) is False:
             print "Error: '" + sys.argv[-1] + "' is not a directory."
+            must_exit = True
+        if sys.argv[-2] == sys.argv[-1]:
+            print "Error: rootDir and mountPoint cannot be the same."
             must_exit = True
         if must_exit is True:
             sys.exit(0)
