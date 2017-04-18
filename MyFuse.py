@@ -164,14 +164,19 @@ class MyFuse(fuse.Fuse):
         return to_return
 
     # Reads file data to buffer, beginning at offset in a file.
-    def read(self, path, size, offset): # defines method to read file
+    def read(self, path, size, offset):         # defines method to read file
         print "*** READ: ", path
         print "**  size: ", size
-        print "* offset: ", offset      # print information used for debugging
+        print "* offset: ", offset              # print information used for debugging
 
-        file_handle = self.open_files[path]  # initialize variable with opened file
-        file_handle.seek(offset)             # seek/find location in file to read data from
-        return file_handle.read(size)        # returns reading from a given length
+        if path == "/" + self.randomFilename or path == "/" + self.cpmFilename:
+            # this is where the magic happens
+            to_return = 0
+        else:
+            file_handle = self.open_files[path] # initialize variable with opened file
+            file_handle.seek(offset)            # seek/find location in file to read data from
+            to_return = file_handle.read(size)  # reads for a given length
+        return to_return
 
     # Writes file data from buffer beginning at file start offset
     def write(self, path, buf, offset, fh = None):  # defines method to write to a file
