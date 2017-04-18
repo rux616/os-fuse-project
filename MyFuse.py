@@ -58,8 +58,7 @@ class MyFuse(fuse.Fuse):
     # Change permissions for object to new permissions
     def chmod(self, path, mode):             # defines chmod to alter permissions
         print "*** CHMOD: ", path            # print information used for debugging
-        if path == "/" + self.randomFilename or \
-          path == "/" + self.cpmFilename:
+        if path == "/" + self.randomFilename or path == "/" + self.cpmFilename:
             toReturn = -errno.EPERM
         else:
             os.chmod(self.rootDir + path, mode)  # syscall updating permissions mode
@@ -69,12 +68,11 @@ class MyFuse(fuse.Fuse):
     # Obtains file attributes - method fills in the elements of the "stat" structure.
     def getattr(self, path):                  # defines getattr to fetch attribute from file
         print "GETATTR-path: ", path          # print information used for debugging
-        if path == "/" + self.randomFilename or \
-          path == "/" + self.cpmFilename:
-            to_return = self.fileStat
+        if path == "/" + self.randomFilename or path == "/" + self.cpmFilename:
+            toReturn = self.fileStat
         else:
-            to_return = os.lstat(self.rootDir + path)
-        return to_return                      # return object with syscall updating status attributes
+            toReturn = os.lstat(self.rootDir + path)
+        return toReturn                       # return object with syscall updating status attributes
 
     # Lists directory entries (dirent) back to a caller
     def readdir(self, path, offset):   # defines readdir which lists files/folders
