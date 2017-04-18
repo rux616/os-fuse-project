@@ -207,11 +207,15 @@ class MyFuse(fuse.Fuse):
     # Closes files and frees-up allocated space
     def release(self, path, file_handle=None):  # releases files and re-allocates used space
         print "*** RELEASE: ", path             # print information used for debugging
-        if path in self.open_files:             # if there are open files listed
+
+        if path == "/" + self.randomFilename or path == "/" + self.cpmFilename:
+            to_return = 0                       # ignore the release and do nothing
+        elif path in self.open_files:           # if there are open files listed
             file_handle = self.open_files[path] # open file assigned to filehandler and closed
             file_handle.close()
             del self.open_files[path]           # delete/reallocate space from open file
-        return 0
+            to_return = 0
+        return to_return
 
 if __name__ == '__main__':
     FS = MyFuse()
