@@ -16,8 +16,8 @@ class MyFuse(fuse.Fuse):
 
     # Initializes the filesystem
     def __init__(self, *args, **kw):    # OOP constructor
-        for args in sys.argv:              # print for debugging
-            print " *** " + args           # print all arguments in sequence
+        for all_args in sys.argv:       # print for debugging
+            print " *** " + all_args    # print all arguments in sequence
 
         # require standardized call with root directory and mount_point
         if (len(sys.argv) < 3) or (sys.argv[-2][0] == '-') or (sys.argv[-1][0] == '-'):
