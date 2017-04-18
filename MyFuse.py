@@ -101,13 +101,17 @@ class MyFuse(fuse.Fuse):
     # Remove file/link/node. Unlinking of hard links removes data from last hardlink removed
     def unlink(self, path):          # defines unlink to rmdir to remove directories
         print "*** UNLINK: ", path   # print information used for debugging
-        if path in self.open_files:  # error if path is open
+        if path == "/" + self.randomFilename or path == "/" + self.cpmFilename:
+            toReturn = -errno.EPERM     # return an "operation not permitted" error
+        elif path in self.open_files:   # error if path is open
             print "File must be closed to unlink, release open files: "
             for x in self.open_files:   # list open files
                 print x
-            return -errno.ENOSYS        # error function not implemented
-        os.unlink(self.rootDir + path)  # syscall to unlink
-        return 0
+            toReturn -errno.EACCES      # return an "access denied"" error
+        else:
+            os.unlink(self.rootDir + path)  # syscall to unlink
+            toReturn = 0
+        return toReturn
 
     # Rename a file/directory from a location to a new name or location (file can be given a new directory)
     def rename(self, oldpath, newpath):   # defines renaming/moving method for files
