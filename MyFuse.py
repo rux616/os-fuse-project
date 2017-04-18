@@ -193,20 +193,20 @@ class MyFuse(fuse.Fuse):
         return to_return
 
     # Called on each close so that the filesystem has a chance to report delayed errors.
-    def flush(self, path, file_handle=None):   # defines flush method for Fuse
-        print "*** FLUSH: ", path       # print information used for debugging
-        if path in self.open_files:     # if path is open, flush the buffer
+    def flush(self, path, file_handle=None):    # defines flush method for Fuse
+        print "*** FLUSH: ", path               # print information used for debugging
+        if path in self.open_files:             # if path is open, flush the buffer
             file_handle = self.open_files[path]
             file_handle.flush()
         return 0
 
     # Closes files and frees-up allocated space
-    def release(self, path, file_handle=None): # releases files and re-allocates used space
-        print "*** RELEASE: ", path     # print information used for debugging
-        if path in self.open_files:     # if there are open files listed
-            file_handle = self.open_files[path]  # open file assigned to filehandler and closed
+    def release(self, path, file_handle=None):  # releases files and re-allocates used space
+        print "*** RELEASE: ", path             # print information used for debugging
+        if path in self.open_files:             # if there are open files listed
+            file_handle = self.open_files[path] # open file assigned to filehandler and closed
             file_handle.close()
-            del self.open_files[path]   # delete/reallocate space from open file
+            del self.open_files[path]           # delete/reallocate space from open file
         return 0
 
 if __name__ == '__main__':
