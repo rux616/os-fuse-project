@@ -148,15 +148,20 @@ class MyFuse(fuse.Fuse):
         access_flags = os.O_RDONLY | os.O_WRONLY | os.O_RDWR    # set access flags
         access_flags = flags & access_flags
 
-        if access_flags == os.O_RDONLY:           # if file is "read only"
-            file_handle = open(self.root_dir + path, "rb")  # file opened in "read only/binary" mode
-            self.open_files[path] = file_handle            # open file moved to open_files list
-            return 0
-        else:                                     # if file is "write only" or "read & write"
+        if path == "/" + self.randomFilename or path == "/" + self.cpmFilename:
+            to_return = 0
+        elif access_flags == os.O_RDONLY:                   # if file is "read only"
+            file_handle = open(self.root_dir + path, "rb")  # open file in "read only/binary" mode
+            self.open_files[path] = file_handle             # open file moved to open_files list
+            to_return = 0
+        elif access_flags & os.O_WRONLY == os.O_WRONLY or \
+          access_flags & os.O_RDWR == os.O_RDWR:            # if file is "write only" or "read & write"
             file_handle = open(self.root_dir + path, "wb")  # file opened in "write only/binary" mode
-            self.open_files[path] = file_handle            # open file moved to open_files list
-            return 0
-        return -errno.EACCES  # if file doesn't fit prior criteria, error: permission denied
+            self.open_files[path] = file_handle             # open file moved to open_files list
+            to_return = 0
+        else:
+            to_return = -errno.EACCES  # if file doesn't fit prior criteria, error: permission denied
+        return to_return
 
     # Reads file data to buffer, beginning at offset in a file.
     def read(self, path, size, offset): # defines method to read file
