@@ -13,6 +13,7 @@ fuse.fuse_python_api = (0, 2)   # application programming interface (0, 2)
 class MyFuse(fuse.Fuse):
     randomFilename = "grandom"      # variable to hold the filename for random number access
     cpmFilename = "gcpm"            # variable to hold the filename for CPM access
+    fileStat = None                 # stat structure for the two special files
 
     # Initializes the filesystem
     def __init__(self, *args, **kw):    # OOP constructor
@@ -46,6 +47,12 @@ class MyFuse(fuse.Fuse):
         self.open_files = {}                    # initialize open_files to empty
         fuse.Fuse.__init__(self, *args, **kw)   # creates fuse Object
 
+        # Initialize dummy stat structure for the two special files.
+        dummyTouch = "/dummytouch"
+        with open(sys.argv[-1] + dummyTouch, 'a'):
+            self.fileStat = os.lstat(sys.argv[-1] + dummyTouch)
+        os.remove(sys.argv[-1] + dummyTouch)
+
   # ==================== Filesystem Methods ====================
 
     # Change permissions for object to new permissions
@@ -53,16 +60,13 @@ class MyFuse(fuse.Fuse):
         print "*** CHMOD: ", path            # print information used for debugging
         os.chmod(self.rootDir + path, mode)  # syscall updating permissions mode
         return 0
-    
+
     # Obtains file attributes - method fills in the elements of the "stat" structure.
     def getattr(self, path):                  # defines getattr to fetch attribute from file
         print "GETATTR-path: ", path          # print information used for debugging
-        if path == "/" + self.randomFilename:      # handle the random file
-            to_return = os.lstat("/dev/random")
-            # to_return
-        elif path == "/" + self.cpmFilename:       # handle the cpm file
-            to_return = os.lstat("/dev/random")
-            # to_return
+        if path == "/" + self.randomFilename or \
+          path == "/" + self.cpmFilename:
+            to_return = self.fileStat
         else:
             to_return = os.lstat(self.rootDir + path)
         return to_return                      # return object with syscall updating status attributes
