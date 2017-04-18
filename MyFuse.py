@@ -128,11 +128,15 @@ class MyFuse(fuse.Fuse):
     # ==================== File Methods ====================
 
     # creates path not previously in existence
-    def create(self, path, flags, mode):            # defines method to create file
-        print "*** CREATE: ", path                  # print for debugging
-        fhandle = open(self.rootDir + path, "w")    # opens new file to write to
-        self.open_files[path] = fhandle             # open new file
-        return 0
+    def create(self, path, flags, mode):                # defines method to create file
+        print "*** CREATE: ", path                      # print for debugging
+        if path == "/" + self.randomFilename or path == "/" + self.cpmFilename:
+            toReturn = -errno.EPERM                     # return an "operation not permitted" error
+        else:
+            fhandle = open(self.rootDir + path, "w")    # opens new file to write to
+            self.open_files[path] = fhandle             # open new file
+            toReturn = 0
+        return toReturn
 
     # Opens a file to read or write
     def open(self, path, flags):   # defines method to open a file
