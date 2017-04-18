@@ -117,8 +117,13 @@ class MyFuse(fuse.Fuse):
     def rename(self, oldpath, newpath):   # defines renaming/moving method for files
         print "*** RENAME: ", oldpath     # print oldpath information used for debugging
         print "***     TO: ", newpath     # print newpath information used for debugging
-        os.rename(self.rootDir + oldpath, self.rootDir + newpath)   # syscall to rename file
-        return 0
+        if oldpath == "/" + self.randomFilename or oldpath == "/" + self.cpmFilename or \
+          newpath == "/" + self.randomFilename or newpath == "/" + self.cpmFilename:
+            toReturn = -errno.EPERM       # return an "operation not permitted" error
+        else:
+            os.rename(self.rootDir + oldpath, self.rootDir + newpath)   # syscall to rename file
+            toReturn = 0
+        return toReturn
 
     # ==================== File Methods ====================
 
