@@ -10,10 +10,10 @@ import time    # gives time functions
 
 fuse.fuse_python_api = (0, 2)   # application programming interface (0, 2)
 
-filenameRandom = "grandom"      # variable to hold the filename for random number access
-filenameCPM = "gcpm"            # variable to hold the filename for CPM access
-
 class MyFuse(fuse.Fuse):
+    randomFilename = "grandom"      # variable to hold the filename for random number access
+    filenameCPM = "gcpm"            # variable to hold the filename for CPM access
+
     # Initializes the filesystem
     def __init__(self, *args, **kw):    # OOP constructor
         for x in sys.argv:              # print for debugging
@@ -57,10 +57,10 @@ class MyFuse(fuse.Fuse):
     # Obtains file attributes - method fills in the elements of the "stat" structure.
     def getattr(self, path):                  # defines getattr to fetch attribute from file
         print "GETATTR-path: ", path          # print information used for debugging
-        if path == "/" + filenameRandom:      # handle the random file
+        if path == "/" + self.randomFilename:      # handle the random file
             to_return = os.lstat("/dev/random")
             # to_return
-        elif path == "/" + filenameCPM:       # 
+        elif path == "/" + self.filenameCPM:       # 
             to_return = os.lstat("/dev/random")
             # to_return
         else:
@@ -75,7 +75,7 @@ class MyFuse(fuse.Fuse):
             yield fuse.Direntry(e)
         for x in os.listdir(self.rootDir + path):     # list all file basenames in path
             yield fuse.Direntry(os.path.basename(x))  # yield fuse.Direntry(os.path.basename(x))
-        for e in filenameRandom, filenameCPM:
+        for e in self.randomFilename, self.filenameCPM:
             yield fuse.Direntry(e)
         return
     
