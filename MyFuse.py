@@ -13,7 +13,6 @@ fuse.fuse_python_api = (0, 2)   # application programming interface (0, 2)
 class MyFuse(fuse.Fuse):
     randomFilename = "grandom"      # variable to hold the filename for random number access
     cpmFilename = "gcpm"            # variable to hold the filename for CPM access
-    fileStat = None                 # stat structure for the two special files
 
     # Initializes the filesystem
     def __init__(self, *args, **kw):    # OOP constructor
