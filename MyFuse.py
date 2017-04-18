@@ -179,7 +179,7 @@ class MyFuse(fuse.Fuse):
         return to_return
 
     # Writes file data from buffer beginning at file start offset
-    def write(self, path, buf, offset, fh = None):  # defines method to write to a file
+    def write(self, path, buf, offset, file_handle=None):  # defines method to write to a file
         print "*** WRITE: ", path
         print "** offset: ", offset     # print information used for debugging
 
@@ -189,19 +189,19 @@ class MyFuse(fuse.Fuse):
         return len(buf)                 # return buffer length
 
     # Called on each close so that the filesystem has a chance to report delayed errors.
-    def flush(self, path, fh = None):   # defines flush method for Fuse
+    def flush(self, path, file_handle=None):   # defines flush method for Fuse
         print "*** FLUSH: ", path       # print information used for debugging
         if path in self.open_files:     # if path is open, flush the buffer
-            fh = self.open_files[path]
-            fh.flush()
+            file_handle = self.open_files[path]
+            file_handle.flush()
         return 0
 
     # Closes files and frees-up allocated space
-    def release(self, path, fh = None): # releases files and re-allocates used space
+    def release(self, path, file_handle=None): # releases files and re-allocates used space
         print "*** RELEASE: ", path     # print information used for debugging
         if path in self.open_files:     # if there are open files listed
-            fh = self.open_files[path]  # open file assigned to filehandler and closed
-            fh.close()
+            file_handle = self.open_files[path]  # open file assigned to filehandler and closed
+            file_handle.close()
             del self.open_files[path]   # delete/reallocate space from open file
         return 0
 
