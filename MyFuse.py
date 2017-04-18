@@ -60,7 +60,7 @@ class MyFuse(fuse.Fuse):
         if path == "/" + self.randomFilename:      # handle the random file
             to_return = os.lstat("/dev/random")
             # to_return
-        elif path == "/" + self.cpmFilename:       # 
+        elif path == "/" + self.cpmFilename:       # handle the cpm file
             to_return = os.lstat("/dev/random")
             # to_return
         else:
