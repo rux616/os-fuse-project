@@ -2,6 +2,7 @@
 import sys
 import random
 import urllib2
+
 x =10
 result = urllib2.urlopen("http://cs.iusb.edu/~djcassid/server.php?numStamps=" + x) .read()
 print(result)
