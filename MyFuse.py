@@ -169,9 +169,21 @@ class MyFuse(fuse.Fuse):
         print "**  size: ", size
         print "* offset: ", offset              # print information used for debugging
 
-        if path == "/" + self.randomFilename or path == "/" + self.cpmFilename:
+        if path == "/" + self.randomFilename:
             # this is where the magic happens
+            #[function call to Derek's packed bits code]
+            if len(derek_return) < size:
+                #error
+                print "Random list is wrong size, proceeding with dumping from python RNG"
+            else:
+                return derek_return #is this the proper format?  check it out
             to_return = 0
+        elif path == "/" + self.cpmFilename:
+            # this is where some more magic happens
+            #[function call to Derek's CPM code]
+            #[return the result]
+
+            to_return = 0 # dummy return
         else:
             file_handle = self.open_files[path] # initialize variable with opened file
             file_handle.seek(offset)            # seek/find location in file to read data from
