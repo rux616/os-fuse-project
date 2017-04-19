@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
-               # encode/decode w/ utf-8: full-range of unicode chars, w/o addressing endian issues
-import errno   # makes available errno system calls
-import stat    # constants/functions for interpreting results of os.stat()
-import os      # needed for os interfaces
-import sys     # provides access to variables used/maintained by interpreter (inc. argv)
-import time    # gives time functions
-import fuse    # include fuse calls from python-fuse
+# encode/decode w/ utf-8: full-range of unicode chars, w/o addressing endian issues
+import errno        # makes available errno system calls
+import stat         # constants/functions for interpreting results of os.stat()
+import os           # needed for os interfaces
+import sys          # provides access to variables used/maintained by interpreter (inc. argv)
+import time         # gives time functions
+import fuse         # include fuse calls from python-fuse
+import RandCalcs    # Derek's functions for handling number generation
 
 fuse.fuse_python_api = (0, 2)   # application programming interface (0, 2)
 
@@ -47,13 +48,20 @@ class MyFuse(fuse.Fuse):
         fuse.Fuse.__init__(self, *args, **kw)   # creates fuse Object
 
         # Initialize dummy stat structure for the two special files.
-        dummy_touch = "/dummytouch"
-        with open(sys.argv[-1] + dummy_touch, 'a'):
-            current_mode = stat.S_IMODE(os.lstat(sys.argv[-1] + dummy_touch).st_mode)
-            os.chmod(sys.argv[-1] + dummy_touch, current_mode & \
+        # This entails opening a dummy file, padding it to a size of 4097 bytes, modifying its
+        # permissions to 444 (read only for all), copying the file's stat structure into a class
+        # instance variable, then deleting the dummy file.
+        # The padding to 4097 is extremely important as that's the max number of bytes that will
+        # be returned + a final linefeed. (So 4096 bytes of data + 1 byte of linefeed.)
+        dummy_filename = "/dummytouch"
+        with open(sys.argv[-1] + dummy_filename, 'a') as dummy_file:
+            dummy_file.write(bytearray(4097))
+            dummy_file.flush()
+            current_mode = stat.S_IMODE(os.lstat(sys.argv[-1] + dummy_filename).st_mode)
+            os.chmod(sys.argv[-1] + dummy_filename, current_mode & \
               ~(stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH))
-            self.file_stat = os.lstat(sys.argv[-1] + dummy_touch)
-        os.remove(sys.argv[-1] + dummy_touch)
+            self.file_stat = os.lstat(sys.argv[-1] + dummy_filename)
+        os.remove(sys.argv[-1] + dummy_filename)
 
   # ==================== Filesystem Methods ====================
 
@@ -169,21 +177,28 @@ class MyFuse(fuse.Fuse):
         print "**  size: ", size
         print "* offset: ", offset              # print information used for debugging
 
+        linefeed = chr(10)                      # use a variable rather littering chr(10) around
+
         if path == "/" + self.randomFilename:
             # this is where the magic happens
             #[function call to Derek's packed bits code]
-            if len(derek_return) < size:
-                #error
-                print "Random list is wrong size, proceeding with dumping from python RNG"
-            else:
-                return derek_return #is this the proper format?  check it out
-            to_return = 0
-        elif path == "/" + self.cpmFilename:
-            # this is where some more magic happens
-            #[function call to Derek's CPM code]
-            #[return the result]
+            # if len(derek_return) < size:
+            #     #error
+            #     print "Random list is wrong size, proceeding with dumping from python RNG"
+            #     derek_return = []
+            #     for i from 0 to size:
 
-            to_return = 0 # dummy return
+
+            # #process derek_return to put it in proper format to return
+
+            # to_return = formatted_output
+            print "reading random"
+            # Note: The returned data must end in chr(10)
+            # Note: The returned data should be (size_of_file - 1) then padded in the ending chr(10)
+            to_return = "" + linefeed
+        elif path == "/" + self.cpmFilename:
+            # Get the calculated CPM
+            to_return = str(RandCalcs.calcTime()) + linefeed
         else:
             file_handle = self.open_files[path] # initialize variable with opened file
             file_handle.seek(offset)            # seek/find location in file to read data from
