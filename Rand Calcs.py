@@ -1,8 +1,10 @@
 # Import the modules
 import sys
 import random
-
-globalIndex = 0
+import urllib2
+x =10
+result = urllib2.urlopen("http://cs.iusb.edu/~djcassid/server.php?numStamps=" + x) .read()
+print(result)
 
 def importStamps():
     return [line.rstrip('\n') for line in open('TimeStamps.txt')]
@@ -87,17 +89,53 @@ def unpackBits (packedList):
     tempList.clear()
     return numList
 
+def calcTime():
+    stamps = importStamps()
+    subtractionList = []
+    #print(len(stamps))
+    i = 0
+    for x in range(len(stamps) - 1):
+        stamps[i] = float(stamps[i + 1]) - float(stamps[i])
+        subtractionList.append(round(float(stamps[i]), 2))
+        i += 1
+    stamps.clear()
 
-def newlist():
-    list = importStamps()
-    list = calcNumbers(list)
-    list = packBits(list)
-    return list
+    count = 1
+    timeSum = 0
+    i = 0
+    for x in subtractionList:
+        if float(subtractionList[i]) < 30:
+            count = count + 1
+            timeSum = timeSum + subtractionList[i]
+        i += 1
 
+    print(count)
+    print(timeSum)
+
+    minutesCount = int(timeSum / 60)
+    print(minutesCount)
+    cpm = count / minutesCount
+    print(cpm)
+
+    return cpm
+
+def packedListCall():
+    unpackedList = importStamps()
+    unpackedList = calcNumbers(unpackedList)
+    unpackedList = packBits(unpackedList)
+    unpackedList = unpackBits(unpackedList)
+    return unpackedList
+
+def unpackedListCall():
+    packedList = importStamps()
+    packedList = calcNumbers(packedList)
+    packedList = packBits(packedList)
+    return packedList
 
 #example main calls
-list = newlist()
+list = unpackedListCall()
+list2 = packedListCall()
 print(list[0])
-numbersList = unpackBits(list)
-print(numbersList[0])
+print(list2[0])
 
+var1 = calcTime()
