@@ -1,14 +1,15 @@
 <?php
 $handle = fopen("timestamps.txt", "r") or die ("Could not open timestamps file");
 $buffer = "";
-const NUM_STAMPS = 61;
+const NUM_STAMPS = 60;
+const BYTES_PER_STAMP = 15;
+
 $fpointer;
 
 if ($handle)
 {
-    $fpointer = fseek($handle, -900, $whence = SEEK_END);
-    fgets($handle);
-    #$buffer = "";               #toss out first timestamp
+    $fpointer = fseek($handle, -(NUM_STAMPS * BYTES_PER_STAMP), $whence = SEEK_END);
+    fgets($handle); #toss out first timestamp
 
     for($i = 0; $i < NUM_STAMPS; ++$i)
     {
