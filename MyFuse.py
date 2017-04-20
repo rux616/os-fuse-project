@@ -194,7 +194,7 @@ class MyFuse(fuse.Fuse):
             to_return += os.urandom(size - len(to_return))
             print "Padded size: ", len(to_return)
         elif path == "/" + self.cpmFilename:                    # CPM
-            to_return = str(RandCalcs.calcTime()) + linefeed    # get the calculated CPM
+            to_return = str(RandCalcs.calcTime())               # get the calculated CPM
         else:
             file_handle = self.open_files[path] # initialize variable with opened file
             file_handle.seek(offset)            # seek/find location in file to read data from
