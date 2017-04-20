@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
-               # encode/decode w/ utf-8: full-range of unicode chars, w/o addressing endian issues
-import errno   # makes available errno system calls
-import stat    # constants/functions for interpreting results of os.stat()
-import os      # needed for os interfaces
-import sys     # provides access to variables used/maintained by interpreter (inc. argv)
-import time    # gives time functions
-import fuse    # include fuse calls from python-fuse
+# encode/decode w/ utf-8: full-range of unicode chars, w/o addressing endian issues
+import errno        # makes available errno system calls
+import stat         # constants/functions for interpreting results of os.stat()
+import os           # needed for os interfaces
+import sys          # provides access to variables used/maintained by interpreter (inc. argv)
+import time         # gives time functions
+import fuse         # include fuse calls from python-fuse
+import random
+import RandCalcs    # Derek's functions for handling number generation
 
 fuse.fuse_python_api = (0, 2)   # application programming interface (0, 2)
 
@@ -47,13 +49,21 @@ class MyFuse(fuse.Fuse):
         fuse.Fuse.__init__(self, *args, **kw)   # creates fuse Object
 
         # Initialize dummy stat structure for the two special files.
-        dummy_touch = "/dummytouch"
-        with open(sys.argv[-1] + dummy_touch, 'a'):
-            current_mode = stat.S_IMODE(os.lstat(sys.argv[-1] + dummy_touch).st_mode)
-            os.chmod(sys.argv[-1] + dummy_touch, current_mode & \
+        # This entails opening a dummy file, padding it to a size of 4096 bytes, modifying its
+        # permissions to 444 (read only for all), copying the file's stat structure into a class
+        # instance variable, then deleting the dummy file.
+        # The padding to 4096 is extremely important as that's the default number of bytes to be
+        # returned from a read call.  Commands like 'cat' won't return anything if the file size
+        # is left at 0.
+        dummy_filename = "/dummytouch"
+        with open(sys.argv[-1] + dummy_filename, 'a') as dummy_file:
+            dummy_file.write(bytearray(4096))
+            dummy_file.flush()
+            current_mode = stat.S_IMODE(os.lstat(sys.argv[-1] + dummy_filename).st_mode)
+            os.chmod(sys.argv[-1] + dummy_filename, current_mode & \
               ~(stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH))
-            self.file_stat = os.lstat(sys.argv[-1] + dummy_touch)
-        os.remove(sys.argv[-1] + dummy_touch)
+            self.file_stat = os.lstat(sys.argv[-1] + dummy_filename)
+        os.remove(sys.argv[-1] + dummy_filename)
 
   # ==================== Filesystem Methods ====================
 
@@ -169,9 +179,22 @@ class MyFuse(fuse.Fuse):
         print "**  size: ", size
         print "* offset: ", offset              # print information used for debugging
 
-        if path == "/" + self.randomFilename or path == "/" + self.cpmFilename:
-            # this is where the magic happens
-            to_return = 0
+        if path == "/" + self.randomFilename:   # random bytes requested
+            byte_list = RandCalcs.packedListCall(size)  # get a number of random bytes
+
+            print "Requested size: ", size      # debug statements
+            print "Delivered size: ", len(byte_list)
+
+            to_return = ""                      # ensure return variable is a string
+            for random_byte in byte_list:       # walk through byte list
+                to_return += chr(random_byte)   # process bytes into a string
+
+            # if our random function fails to return enough random bytes, pad the return variable
+            # with additional random bytes from python
+            to_return += os.urandom(size - len(to_return))
+            print "Padded size: ", len(to_return)
+        elif path == "/" + self.cpmFilename:                    # CPM
+            to_return = str(RandCalcs.calcTime()) + linefeed    # get the calculated CPM
         else:
             file_handle = self.open_files[path] # initialize variable with opened file
             file_handle.seek(offset)            # seek/find location in file to read data from
