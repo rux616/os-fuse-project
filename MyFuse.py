@@ -7,6 +7,7 @@ import os           # needed for os interfaces
 import sys          # provides access to variables used/maintained by interpreter (inc. argv)
 import time         # gives time functions
 import fuse         # include fuse calls from python-fuse
+import random
 import RandCalcs    # Derek's functions for handling number generation
 
 fuse.fuse_python_api = (0, 2)   # application programming interface (0, 2)
@@ -48,14 +49,15 @@ class MyFuse(fuse.Fuse):
         fuse.Fuse.__init__(self, *args, **kw)   # creates fuse Object
 
         # Initialize dummy stat structure for the two special files.
-        # This entails opening a dummy file, padding it to a size of 4097 bytes, modifying its
+        # This entails opening a dummy file, padding it to a size of 4096 bytes, modifying its
         # permissions to 444 (read only for all), copying the file's stat structure into a class
         # instance variable, then deleting the dummy file.
-        # The padding to 4097 is extremely important as that's the max number of bytes that will
-        # be returned + a final linefeed. (So 4096 bytes of data + 1 byte of linefeed.)
+        # The padding to 4096 is extremely important as that's the default number of bytes to be
+        # returned from a read call.  Commands like 'cat' won't return anything if the file size
+        # is left at 0.
         dummy_filename = "/dummytouch"
         with open(sys.argv[-1] + dummy_filename, 'a') as dummy_file:
-            dummy_file.write(bytearray(4097))
+            dummy_file.write(bytearray(4096))
             dummy_file.flush()
             current_mode = stat.S_IMODE(os.lstat(sys.argv[-1] + dummy_filename).st_mode)
             os.chmod(sys.argv[-1] + dummy_filename, current_mode & \
@@ -177,28 +179,22 @@ class MyFuse(fuse.Fuse):
         print "**  size: ", size
         print "* offset: ", offset              # print information used for debugging
 
-        linefeed = chr(10)                      # use a variable rather littering chr(10) around
+        if path == "/" + self.randomFilename:   # random bytes requested
+            byte_list = RandCalcs.packedListCall(size)  # get a number of random bytes
 
-        if path == "/" + self.randomFilename:
-            # this is where the magic happens
-            #[function call to Derek's packed bits code]
-            # if len(derek_return) < size:
-            #     #error
-            #     print "Random list is wrong size, proceeding with dumping from python RNG"
-            #     derek_return = []
-            #     for i from 0 to size:
+            print "Requested size: ", size      # debug statements
+            print "Delivered size: ", len(byte_list)
 
+            to_return = ""                      # ensure return variable is a string
+            for random_byte in byte_list:       # walk through byte list
+                to_return += chr(random_byte)   # process bytes into a string
 
-            # #process derek_return to put it in proper format to return
-
-            # to_return = formatted_output
-            print "reading random"
-            # Note: The returned data must end in chr(10)
-            # Note: The returned data should be (size_of_file - 1) then padded in the ending chr(10)
-            to_return = "" + linefeed
-        elif path == "/" + self.cpmFilename:
-            # Get the calculated CPM
-            to_return = str(RandCalcs.calcTime()) + linefeed
+            # if our random function fails to return enough random bytes, pad the return variable
+            # with additional random bytes from python
+            to_return += os.urandom(size - len(to_return))
+            print "Padded size: ", len(to_return)
+        elif path == "/" + self.cpmFilename:                    # CPM
+            to_return = str(RandCalcs.calcTime()) + linefeed    # get the calculated CPM
         else:
             file_handle = self.open_files[path] # initialize variable with opened file
             file_handle.seek(offset)            # seek/find location in file to read data from
