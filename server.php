@@ -3,7 +3,7 @@
 //0 needs to be the value stored in this file at first.
 
 $buffer = "";
-$numStamps = 5; #$_GET['numStamps'];
+$numStamps = $_GET['numStamps'];
 #$j = 0;
 
 $handle = fopen("timestamps.txt", "r") 
