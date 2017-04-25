@@ -7,7 +7,7 @@ import os           # needed for os interfaces
 import sys          # provides access to variables used/maintained by interpreter (inc. argv)
 import time         # gives time functions
 import fuse         # include fuse calls from python-fuse
-import random
+import random       # used to generate numbers if we run out of geiger timestamps
 import RandCalcs    # Derek's functions for handling number generation
 
 fuse.fuse_python_api = (0, 2)   # application programming interface (0, 2)
@@ -90,11 +90,11 @@ class MyFuse(fuse.Fuse):
     def readdir(self, path, offset):                # defines readdir which lists files/folders
         print "\n\n*** READDIR: ", path             # print information used for debugging
         print "=====  " + self.root_dir + "  =====" # print information used for debugging
-        for folders in '.', '..':
+        for folders in '.', '..':                           # list default directories
             yield fuse.Direntry(folders)
         for files in os.listdir(self.root_dir + path):      # list all file basenames in path
-            yield fuse.Direntry(os.path.basename(files))    # yield fuse.Direntry(os.path.basename(x))
-        for files in self.randomFilename, self.cpmFilename:
+            yield fuse.Direntry(os.path.basename(files))
+        for files in self.randomFilename, self.cpmFilename: # list special files
             yield fuse.Direntry(files)
         return
 
@@ -165,12 +165,12 @@ class MyFuse(fuse.Fuse):
             self.open_files[path] = file_handle             # open file moved to open_files list
             to_return = 0
         elif access_flags & os.O_WRONLY == os.O_WRONLY or \
-          access_flags & os.O_RDWR == os.O_RDWR:            # if file is "write only" or "read & write"
-            file_handle = open(self.root_dir + path, "wb")  # file opened in "write only/binary" mode
+          access_flags & os.O_RDWR == os.O_RDWR:            # "write only" or "read & write"
+            file_handle = open(self.root_dir + path, "wb")  # open in "write only/binary" mode
             self.open_files[path] = file_handle             # open file moved to open_files list
             to_return = 0
-        else:
-            to_return = -errno.EACCES  # if file doesn't fit prior criteria, error: permission denied
+        else:                                               # permission denied
+            to_return = -errno.EACCES
         return to_return
 
     # Reads file data to buffer, beginning at offset in a file.
